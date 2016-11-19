@@ -1,5 +1,25 @@
+<!--
+Copyright 2012 Lionheart Software LLC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
 Bottlenose
 ==========
+
+[![Version](https://img.shields.io/pypi/v/bottlenose.svg?style=flat)](https://pypi.python.org/pypi/restmapper)
+[![License](https://img.shields.io/pypi/l/bottlenose.svg?style=flat)](https://pypi.python.org/pypi/restmapper)
+[![Downloads](http://img.shields.io/pypi/dm/bottlenose.svg?style=flat)](https://pypi.python.org/pypi/restmapper)
 
 Description
 -----------
@@ -14,7 +34,7 @@ Features
 --------
 
 * Compatible with Python versions 2.4 and up
-* Support for CA, CN, DE, ES, FR, IT, JP, UK, and US Amazon endpoints
+* Support for CA, CN, DE, ES, FR, IN, IT, JP, UK, and US Amazon endpoints
 * No requirements, except simplejson for Python pre-2.6
 * Configurable query parsing
 * Configurable throttling for batches of queries
@@ -26,57 +46,89 @@ Usage
 
 #### 1. Available Search Methods:
 
+##### Required
+
 ```python
-# Required
 amazon = bottlenose.Amazon(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ASSOCIATE_TAG)
+```
 
-# Search for a Specific Item
+##### Search for a Specific Item
+
+```python
 response = amazon.ItemLookup(ItemId="B007OZNUCE")
+```
 
-# Search for Items by Keywords
+##### Search for Items by Keywords
+
+```python
 response = amazon.ItemSearch(Keywords="Kindle 3G", SearchIndex="All")
+```
 
-# Search for Images for an item
+##### Search for Images for an item
+
+```python
 response = amazon.ItemLookup(ItemId="1449372422", ResponseGroup="Images")
+```
 
-# Search for Similar Items
+##### Search for Similar Items
+
+```python
 response = amazon.SimilarityLookup(ItemId="B007OZNUCE")
 ```
 
 #### 2. Available Shopping Related Methods:
 
+##### Required
+
 ```python
-# Required
 amazon = bottlenose.Amazon(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ASSOCIATE_TAG)
+```
 
-# Create a cart
+##### Create a cart
+
+```python
 response = amazon.CartCreate(...)
+```
 
-# Adding to a cart
+##### Adding to a cart
+
+```python
 response = amazon.CartAdd(CartId, ...)
+```
 
-# Get a cart by ID
+##### Get a cart by ID
+
+```python
 response = amazon.CartGet(CartId, ...)
+```
 
-# Modifying a cart
-response = amazon.CartModify(ASIN,CartId,...)
+##### Modifying a cart
 
-# Clearing a cart
+```python
+response = amazon.CartModify(ASIN, CartId,...)
+```
+
+##### Clearing a cart
+
+```python
 response = amazon.CartClear(CartId, ...)
 ```
 
 #### 3. Sample Code
-
-    >>> import bottlenose
-    >>> amazon = bottlenose.Amazon(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ASSOCIATE_TAG)
-    >>> response = amazon.ItemLookup(ItemId="0596520999", ResponseGroup="Images",
+```python
+    import bottlenose
+    amazon = bottlenose.Amazon(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ASSOCIATE_TAG)
+    response = amazon.ItemLookup(ItemId="0596520999", ResponseGroup="Images",
         SearchIndex="Books", IdType="ISBN")
-    <?xml version="1.0" ?><ItemLookupResponse xmlns="http://webservices.amazon...
+    print(response)
+    # <?xml version="1.0" ?><ItemLookupResponse xmlns="http://webservices.amazon...
+```
 
-Here's another example.
-
-    >>> response = amazon.ItemSearch(Keywords="Kindle 3G", SearchIndex="All")
-    <?xml version="1.0" ?><ItemSearchResponse xmlns="http://webservices.amazon...
+Here is another example.
+```python
+    response = amazon.ItemSearch(Keywords="Kindle 3G", SearchIndex="All")
+    # <?xml version="1.0" ?><ItemSearchResponse xmlns="http://webservices.amazon...
+```
 
 Bottlenose can also read your credentials from the environment automatically;
 just set `$AWS_ACCESS_KEY_ID`, `$AWS_SECRET_ACCESS_KEY` and
@@ -94,13 +146,10 @@ for the operation you'd like to call, and you're good to go.
     CartModify
     ItemLookup
     ItemSearch
-    SellerListingLookup
-    SellerListingSearch
-    SellerLookup
     SimilarityLookup
 
 You can refer here for a full listing of API calls to be made from Amazon.
-- [Amazon API Quick Reference Card](http://s3.amazonaws.com/awsdocs/Associates/2011-08-01/prod-adv-api-qrc-2011-08-01.pdf)
+- [Amazon API Quick Reference Card](http://s3.amazonaws.com/awsdocs/Associates/latest/prod-adv-api-qrc.pdf)
 
 -------
 
@@ -157,7 +206,7 @@ returns a (cached) raw response, or `None` if there is nothing cached.
 The cache url is the actual query URL with authentication information removed.
 For example:
 
-    http://ecs.amazonaws.com/onca/xml?Keywords=vacuums&Operation=ItemSearch&Region=US&ResponseGroup=SearchBins&SearchIndex=All&Service=AWSECommerceService&Version=2011-08-01
+    http://webservices.amazon.com/onca/xml?Keywords=vacuums&Operation=ItemSearch&Region=US&ResponseGroup=SearchBins&SearchIndex=All&Service=AWSECommerceService&Version=2013-08-01
 
 Example code:
 

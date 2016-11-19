@@ -1,3 +1,17 @@
+# Copyright 2012 Lionheart Software LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from base64 import b64encode
 import gzip
 import sys
@@ -51,16 +65,18 @@ except ImportError:
     pass
 
 SERVICE_DOMAINS = {
-    'CA': ('ecs.amazonaws.ca', 'xml-ca.amznxslt.com'),
+    'CA': ('webservices.amazon.ca', 'xml-ca.amznxslt.com'),
     'CN': ('webservices.amazon.cn', 'xml-cn.amznxslt.com'),
-    'DE': ('ecs.amazonaws.de', 'xml-de.amznxslt.com'),
+    'DE': ('webservices.amazon.de', 'xml-de.amznxslt.com'),
     'ES': ('webservices.amazon.es', 'xml-es.amznxslt.com'),
-    'FR': ('ecs.amazonaws.fr', 'xml-fr.amznxslt.com'),
+    'FR': ('webservices.amazon.fr', 'xml-fr.amznxslt.com'),
     'IN': ('webservices.amazon.in', 'xml-in.amznxslt.com'),
     'IT': ('webservices.amazon.it', 'xml-it.amznxslt.com'),
-    'JP': ('ecs.amazonaws.jp', 'xml-jp.amznxslt.com'),
-    'UK': ('ecs.amazonaws.co.uk', 'xml-uk.amznxslt.com'),
-    'US': ('ecs.amazonaws.com', 'xml-us.amznxslt.com'),
+    'JP': ('webservices.amazon.co.jp', 'xml-jp.amznxslt.com'),
+    'UK': ('webservices.amazon.co.uk', 'xml-uk.amznxslt.com'),
+    'US': ('webservices.amazon.com', 'xml-us.amznxslt.com'),
+    'BR': ('webservices.amazon.com.br', 'xml-br.amznxslt.com'),
+    'MX': ('webservices.amazon.com.mx', 'xml-mx.amznxslt.com')
 }
 
 log = logging.getLogger(__name__)
@@ -81,7 +97,7 @@ class AmazonError(Exception):
 
 class AmazonCall(object):
     def __init__(self, AWSAccessKeyId=None, AWSSecretAccessKey=None,
-            AssociateTag=None, Operation=None, Version=None, Region=None,
+            AssociateTag=None, Operation=None, Version="2013-08-01", Region=None,
             Timeout=None, MaxQPS=None, Parser=None,
             CacheReader=None, CacheWriter=None,
             ErrorHandler=None,
@@ -153,13 +169,20 @@ class AmazonCall(object):
 
         data = "GET\n" + service_domain + "\n/onca/xml\n" + quoted_strings
 
+        # convert unicode to UTF8 bytes for hmac library
+        if type(self.AWSSecretAccessKey) is unicode:
+            self.AWSSecretAccessKey = self.AWSSecretAccessKey.encode('utf-8')
+
+        if type(data) is unicode:
+            data = data.encode('utf-8')
+
+        # calculate sha256 signature
+        digest = hmac.new(self.AWSSecretAccessKey, data, sha256).digest()
+
+        # base64 encode and urlencode
         if sys.version_info[0] == 3:
-            digest = hmac.new(
-                bytes(self.AWSSecretAccessKey, encoding='utf-8'),
-                bytes(data, encoding='utf-8'), sha256).digest()
             signature = urllib.parse.quote(b64encode(digest))
         else:
-            digest = hmac.new(self.AWSSecretAccessKey, data, sha256).digest()
             signature = urllib.quote(b64encode(digest))
 
         return ("http://" + service_domain + "/onca/xml?" +
@@ -264,7 +287,7 @@ class AmazonCall(object):
 
 class Amazon(AmazonCall):
     def __init__(self, AWSAccessKeyId=None, AWSSecretAccessKey=None,
-            AssociateTag=None, Operation=None, Version="2011-08-01",
+            AssociateTag=None, Operation=None, Version="2013-08-01",
             Region="US", Timeout=None, MaxQPS=None, Parser=None,
             CacheReader=None, CacheWriter=None, ErrorHandler=None):
         """Create an Amazon API object.
