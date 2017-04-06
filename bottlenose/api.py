@@ -276,7 +276,10 @@ class AmazonCall(object):
                 response_text = gzipped_file.read()
             else:
                 response_text = response.read()
-
+        
+        # close early
+        response.close()
+        
         # write it back to the cache
         if self.CacheWriter:
             self.CacheWriter(cache_url, response_text)
